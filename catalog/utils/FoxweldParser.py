@@ -1,5 +1,8 @@
-from bs4 import BeautifulSoup
+import requests
 from .BaseParser import BaseParser
+from django.conf import settings
+from .FileHandler import FileHandler
+
 
 
 class FoxweldParser(BaseParser):
@@ -110,10 +113,12 @@ class FoxweldParser(BaseParser):
             if "download" in block_name:
                 files += self._scrap_product_files(block)
                 continue
+        images = self._scrap_images(soup)
         result = {}
         result["description"] = description
         result["attribute_values"] = attribute_values
         result["files"] = files
+        result["images"] = images
         return result
     
     def _scrap_product_desription(self, item):
@@ -141,3 +146,22 @@ class FoxweldParser(BaseParser):
     def _scrap_product_files(self, item):
         return list()
     
+    def _scrap_images(self, soup):
+        div_images = soup.find_all("div", {"class": "image"})
+        files_in_directory = list()
+        for div in div_images:
+            image = div.find("a", {"class": "fancy"})
+            if image is None:
+                continue
+            # Так как, чтобы скачать картинку необходимо сохранить 
+            # ее где-либо в системе, то
+            # будем создавать временную директорию с картинками
+            # и вернем строку, которая будет содержать путь к директории,
+            # а после уже можно будет делать с директорией что угодно
+            href = image.attrs.get("href", "")
+            request = requests.get(self.URL_BODY + href)
+            file_path = FileHandler.get_tmp_file_path(href)
+            FileHandler.create_file(file_path, request.content)
+            files_in_directory.append(file_path)
+
+        return files_in_directory

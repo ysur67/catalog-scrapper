@@ -133,3 +133,6 @@ class BaseParser:
     
     def _scrap_product_files(self, item):
         raise NotImplementedError("Метод _scrap_product_file должен быть переопределен")
+    
+    def _scrap_images(self, soup):
+        raise NotImplementedError("Метод _scrap_images должен быть переопределен")
