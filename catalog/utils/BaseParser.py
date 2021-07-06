@@ -43,6 +43,8 @@ class BaseParser:
             BeautifulSoup: Инстанс бс4, готовый к парсингу
         """
         request = requests.get(url)
+        if request.status_code != 200:
+            raise ConnectionError(f"Не был получен ответ по адресу: {url}")
         return BeautifulSoup(request.text)
     
     def get_product_attribute_values(self, product):
