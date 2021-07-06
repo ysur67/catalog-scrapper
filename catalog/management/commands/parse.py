@@ -7,18 +7,46 @@ from decimal import Decimal
 
 class Command(BaseCommand):
     DEFAULT_URL = "https://foxweld.ru/products/elektrosvarka/"
+    working_url = ""
 
     def add_arguments(self, parser):
         parser.add_argument('--url', default=self.DEFAULT_URL)
     
     def handle(self, *args, **options):
         url = options.get('url')
+        self.working_url = url
         request = requests.get(url)
         soup = BeautifulSoup(request.text)
-        items = soup.find_all('li', {'class': 'item'})
+        last_page = self._get_last_page(soup)
+        for page in range(1, last_page):
+            self._scrap_page(page)
+  
+    def _scrap_page(self, number):
+        pagin_url = self.working_url + f"?PAGEN_1={number}"
+        request = requests.get(pagin_url)
+        soup = BeautifulSoup(request.text)
+        items = soup.find_all("li", {"class": "item"})
         for item in items:
             product_for_import = self.get_product_dict(item)
             self._import_product(product_for_import)
+            
+    def _get_last_page(self, html_body):
+        """Получить последнюю страницу из пагинации.
+
+        Returns:
+            int: Номер последней страницы
+        """
+        pagination_block = html_body.find("div", {"class": "modern-page-navigation"})
+        pagination_links = pagination_block.find_all("a")
+        pages = list()
+        for link in pagination_links:
+            value = link.text
+            try:
+                value = int(value)
+            except ValueError:
+                value = 0
+            pages.append(value)
+        return max(pages)
             
     def get_product_dict(self, product):
         """Получить словарь модели продукта, готовый к импорту.
@@ -34,10 +62,13 @@ class Command(BaseCommand):
         props_block = product.find("div", {"class": "props"})
         product_props = self._get_props(props_block)
         price_block = product.find("span", {"class", "price-val"})
-        price_value = price_block.find("b")
+        if price_block:
+            price_value = price_block.find("b").text
+        else:
+            price_value = "0"
         
         product_title = self._clear(title_block.text)
-        product_price = self._clear(price_value.text)
+        product_price = self._clear(price_value)
         for key in product_props:
             product_props[key] = self._clear(product_props[key])
 
@@ -47,8 +78,8 @@ class Command(BaseCommand):
         result['id'] = id_
         result['title'] = product_title
         result['price'] = self._get_price(product_price)
-        result['code'] = product_props['Артикул:']
-        result['series'] = product_props['Серия:']
+        result['code'] = product_props.get("Артикул:", None)
+        result['series'] = product_props.get("Серия:", None)
         
         return result     
         
@@ -104,4 +135,3 @@ class Command(BaseCommand):
     def _import_product(self, dict: dict) -> Product:
         product = Product.get_instance_by_id(dict['id'])
         product.insert_fields(dict)
-        print(product.title)
