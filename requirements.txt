@@ -3,8 +3,10 @@ beautifulsoup4==4.9.3
 certifi==2021.5.30
 chardet==4.0.0
 Django==3.2.5
+django-ckeditor==6.1.0
 django-environ==0.4.5
 django-extensions==3.1.1
+django-js-asset==1.2.2
 djangorestframework==3.12.2
 idna==2.10
 psycopg2-binary==2.8.6

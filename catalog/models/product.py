@@ -1,5 +1,6 @@
 from django.db import models
 from .category import Category
+from ckeditor.fields import RichTextField
 
 
 class Product(models.Model):
@@ -11,7 +12,9 @@ class Product(models.Model):
     code = models.CharField(verbose_name="Артикул", max_length=150, null=True, blank=True)
     series = models.CharField(verbose_name="Серия", max_length=150, null=True, blank=True)
     price = models.DecimalField(verbose_name="Цена", max_digits=12, decimal_places=2)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория", null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+                                 verbose_name="Категория", null=True, blank=True)
+    description = RichTextField(verbose_name="Описание", null=True, blank=True)
     
     def __str__(self) -> str:
         return self.title
