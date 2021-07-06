@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-import requests
 from .BaseParser import BaseParser
 
 
@@ -30,13 +29,14 @@ class FoxweldParser(BaseParser):
     
     def _scrap_page(self, page_number):
         pagin_url = self.URL + f"?PAGEN_1={page_number}"
-        request = requests.get(pagin_url)
-        soup = BeautifulSoup(request.text)
+        soup = self.get_soup(pagin_url)
         items = soup.find_all("li", {"class": "item"})
         for item in items:
+            # Изменяем словарь класса на новый словарь
             self._product_for_import = self._get_product_dict(item)
+            # Уведомляем подписчиков о смене словаря
             self._notify()
-            
+
     def _get_product_dict(self, product):
         """Получить словарь модели продукта, готовый к импорту.
 
@@ -94,8 +94,7 @@ class FoxweldParser(BaseParser):
         return result
         
     def _scrap_product_page(self, href) -> dict:
-        request = requests.get(self.URL_BODY + href)
-        soup = BeautifulSoup(request.text)
+        soup = self.get_soup(self.URL_BODY + href)
         product_info_blocks = soup.find_all("div", {"class": "tab-view-content"})
         description = ""
         attribute_values = {}
@@ -118,6 +117,8 @@ class FoxweldParser(BaseParser):
         return result
     
     def _scrap_product_desription(self, item):
+        # .decode_contents()
+        # https://tedboy.github.io/bs4_doc/generated/generated/bs4.BeautifulSoup.decode_contents.html
         return item.find("div", {"class": "i-block-content"}).decode_contents()
     
     def _scrap_product_attribute_value(self, item):
