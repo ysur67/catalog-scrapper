@@ -1,7 +1,7 @@
 import requests
 from .BaseParser import BaseParser
 from django.conf import settings
-from .FileHandler import FileHandler
+from .FileHandler import CustomFile
 
 
 
@@ -153,15 +153,8 @@ class FoxweldParser(BaseParser):
             image = div.find("a", {"class": "fancy"})
             if image is None:
                 continue
-            # Так как, чтобы скачать картинку необходимо сохранить 
-            # ее где-либо в системе, то
-            # будем создавать временную директорию с картинками
-            # и вернем строку, которая будет содержать путь к директории,
-            # а после уже можно будет делать с директорией что угодно
             href = image.attrs.get("href", "")
-            request = requests.get(self.URL_BODY + href)
-            file_path = FileHandler.get_tmp_file_path(href)
-            FileHandler.create_file(file_path, request.content)
-            files_in_directory.append(file_path)
+            image = CustomFile(href=self.URL_BODY + href)
+            files_in_directory.append(image.body)
 
         return files_in_directory

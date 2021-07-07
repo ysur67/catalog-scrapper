@@ -14,7 +14,6 @@ class BaseParser:
     Если обязательные поля и/или методы не были переопределены
     в дочерних классах, то при инициализации будет поднято исключение.
     """
-
     URL = ""
     URL_BODY = ""
     PRODUCT_ID_DATA_ATTR = ""
@@ -46,7 +45,7 @@ class BaseParser:
         if request.status_code != 200:
             raise ConnectionError(f"Не был получен ответ по адресу: {url}")
         return BeautifulSoup(request.text)
-    
+ 
     def get_product_attribute_values(self, product):
         raise NotImplementedError("Метод get_product_attribute_values должен быть переопределен")
     
@@ -55,18 +54,18 @@ class BaseParser:
 
         Args:
             subscriber: Объект-подписчик, у которого обязательно
-            должен быть определен метод `import_product`
+            должен быть определен метод `on_notify`
         """
         # Проверяем наличие метода у подписчика
-        import_product = getattr(subscriber, "import_product", None)
+        import_product = getattr(subscriber, "on_notify", None)
         if not import_product:
-            raise NotImplementedError("Каждый подписчик должен обладать методом import_product!")
+            raise NotImplementedError("Каждый подписчик должен обладать методом on_notify!")
 
         self._subs.append(subscriber)
         
     def _notify(self):
         for subscriber in self._subs:
-            subscriber.import_product(self._product_for_import)
+            subscriber.on_notify(self._product_for_import)
     
     def _validate_required_fields(self):
         is_valid = True
