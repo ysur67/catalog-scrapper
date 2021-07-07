@@ -9,6 +9,7 @@ import requests
 
 class CustomFile:
     PRODUCT_IMAGES_DIR = settings.MEDIA_ROOT + "/product/"
+    PRODUCT_FILES_DIR = settings.MEDIA_ROOT + "/files/"
     _href = ""
     _name = ""
     _temporary_body = None
@@ -27,6 +28,9 @@ class CustomFile:
     def remove_product_images(cls):
         for file_name in os.listdir(cls.PRODUCT_IMAGES_DIR):
             cls.remove_file(cls.PRODUCT_IMAGES_DIR + file_name)
+            
+        for file_name in os.listdir(cls.PRODUCT_FILES_DIR):
+            cls.remove_file(cls.PRODUCT_FILES_DIR + file_name)
 
     @classmethod
     def remove_file(cls, file_path):
@@ -44,14 +48,7 @@ class CustomFile:
     
     def _write_content(self, content):
         temp_file = NamedTemporaryFile(delete=True)
-        # Write the in-memory file to the temporary file
-        # Read the streamed image in sections
-        for block in content.iter_content(1024 * 8):
-            # If no more file then stop
-            if not block:
-                break
-            # Write image block to temporary file
-            temp_file.write(block)
+        temp_file.write(content.content)
         return temp_file
     
     def _get_file_extension(self, url):
@@ -66,4 +63,8 @@ class CustomFile:
         # Делим его еще раз, только на этот раз точкой
         result = result.split(".")
         # Берем последний элемент - расширение файла
-        return result[-1]
+        result = result[-1]
+        # TODO: Вот здесь придумать что-то получше, так делать нельзя
+        # Если расширение файла > 4 символов,
+        # то возрвращаем .pdf
+        return result if len(result) < 5 else "pdf"

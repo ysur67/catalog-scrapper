@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Product, Category, AttributeValue, ProductImage
+from .models import (Product, Category, AttributeValue,
+                     ProductImage, ProductFile)
 
 
 class AttributeInline(admin.TabularInline):
@@ -9,6 +10,10 @@ class AttributeInline(admin.TabularInline):
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 0
+    
+class ProductFileInline(admin.TabularInline):
+    model = ProductFile
+    extra = 0
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -16,7 +21,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [AttributeInline, ProductImageInline, ]
+    inlines = [AttributeInline, ProductImageInline, 
+               ProductFileInline]
 
 @admin.register(AttributeValue)
 class AttributeValueAdmin(admin.ModelAdmin):
@@ -24,4 +30,8 @@ class AttributeValueAdmin(admin.ModelAdmin):
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(ProductFile)
+class ProductFileAdmin(admin.ModelAdmin):
     pass

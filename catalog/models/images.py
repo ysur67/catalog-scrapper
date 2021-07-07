@@ -1,9 +1,6 @@
 from django.db import models 
 from .product import Product
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 
-fs = FileSystemStorage(location='/media/product')
 
 class ProductImage(models.Model):
     

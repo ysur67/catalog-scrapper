@@ -10,6 +10,9 @@ class ElektrodParser(BaseParser):
     PRODUCT_ID_DATA_ATTR = "NONE"
     
     def parse(self):
+        # Крайне древняя верстка на сайте,
+        # потому делаем такие уровни вложенности,
+        # чтобы избежать попадания рандомных тегов в требуемые
         for table in self._get_tables():
             table_rows = table.find_all("tr")
             for row in table_rows:
@@ -54,25 +57,30 @@ class ElektrodParser(BaseParser):
                 attribute_values = self._scrap_product_attribute_value(table)
                 continue
             if "Инструкции по эксплуатации" in item.text:
-                pass
+                # Таблица с файлами - единственная таблица без
+                # класса, поэтому указываем пустой класс
+                table = soup.find("table", {"class": ""})
+                files = self._scrap_product_files(table)
+                continue
             
         images = self._scrap_images(soup)
         result = {}
         result["description"] = description
         result["attribute_values"] = attribute_values
-        result["files"] = None
+        result["files"] = files
         result["images"] = images
         return result
-        
+
     def _scrap_product_desription(self, item):
-        result = ""
-        result = self.__construct_product_description(item)
-        return result
+        return self.__construct_product_description(item)
         
     def __construct_product_description(self, item, result_string=""):
+        """Рекурсивно создать описание товара."""
         next_element = item.next_sibling
         if next_element is None:
             return result_string
+        # Все блоки, до блока технических харакетистик пойдут для описания товара
+        # Поэтому останавливаемся только, когда наткнемся на блок хар-тик
         if "Технические характеристики" in self._clear(str(next_element.string)):
             return result_string
         result_string += str(next_element)
@@ -101,3 +109,28 @@ class ElektrodParser(BaseParser):
             image = CustomFile(href=self.URL_BODY + href)
             scraped_images.append(image.body)
         return scraped_images
+    
+    def _scrap_product_files(self, item):
+        tr_list = item.find_all("tr", {"class": ""})
+        downloaded_files = list()
+        # Крайне древняя верстка на сайте,
+        # потому делаем такие уровни вложенности,
+        # чтобы избежать попадания рандомных тегов в требуемые
+        # тем не менее, это не очень помогло
+        for tr in tr_list:
+            td_list = tr.find_all("td", {"class": ""})
+            for td in td_list:      
+                li_files = td.find_all("li", {"class": ""})
+                for li in li_files:
+                    hyperlink = li.find("a", {"class": ""})
+                    # скипаем li без ссылок, это точно не те, что нужны
+                    if hyperlink is None:
+                        continue
+                    href = hyperlink.attrs.get("href")
+                    # Как уже и было сказано выше, все равно летят рандомные теги
+                    # поэтому добавляем сюда вот это лол
+                    if not "pdf" in href:
+                        continue
+                    file_ = CustomFile(href=self.URL_BODY + href)
+                    downloaded_files.append(file_.body)
+        return downloaded_files

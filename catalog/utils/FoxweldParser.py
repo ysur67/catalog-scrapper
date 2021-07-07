@@ -108,7 +108,7 @@ class FoxweldParser(BaseParser):
                 attribute_values = self._scrap_product_attribute_value(block)
                 continue
             if "download" in block_name:
-                files += self._scrap_product_files(block)
+                files = self._scrap_product_files(block)
                 continue
         images = self._scrap_images(soup)
         result = {}
@@ -141,17 +141,24 @@ class FoxweldParser(BaseParser):
         return attribute_values
     
     def _scrap_product_files(self, item):
-        return list()
+        li_files = item.find_all("li", {"class", "dwl-pdf"})
+        downloaded_files = list()
+        for li in li_files:
+            hyperlink = li.find("a")
+            href = hyperlink.attrs.get("href")
+            file_ = CustomFile(href=href)
+            downloaded_files.append(file_.body)
+        return downloaded_files
     
     def _scrap_images(self, soup):
         div_images = soup.find_all("div", {"class": "image"})
-        files_in_directory = list()
+        downloaded_images = list()
         for div in div_images:
             image = div.find("a", {"class": "fancy"})
             if image is None:
                 continue
             href = image.attrs.get("href", "")
             image = CustomFile(href=self.URL_BODY + href)
-            files_in_directory.append(image.body)
+            downloaded_images.append(image.body)
 
-        return files_in_directory
+        return downloaded_images
