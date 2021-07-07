@@ -72,7 +72,9 @@ class FoxweldParser(BaseParser):
         result['code'] = product_props.get("Артикул:", None)
         result['series'] = product_props.get("Серия:", None)
         
-        print(result)
+        for key in result:
+            print(key)
+            print(result[key])
         return result
     
     def _get_props(self, block):

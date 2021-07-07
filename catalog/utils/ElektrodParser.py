@@ -42,7 +42,9 @@ class ElektrodParser(BaseParser):
         result["price"] = 0
         result["code"] = "ND"
         result["series"] = "ND"
-        print(result)
+        for key in result:
+            print(key)
+            print(result[key])
         return result
         
     def _scrap_product_page(self, href):
@@ -111,26 +113,19 @@ class ElektrodParser(BaseParser):
         return scraped_images
     
     def _scrap_product_files(self, item):
-        tr_list = item.find_all("tr", {"class": ""})
         downloaded_files = list()
-        # Крайне древняя верстка на сайте,
-        # потому делаем такие уровни вложенности,
-        # чтобы избежать попадания рандомных тегов в требуемые
-        # тем не менее, это не очень помогло
-        for tr in tr_list:
-            td_list = tr.find_all("td", {"class": ""})
-            for td in td_list:      
-                li_files = td.find_all("li", {"class": ""})
-                for li in li_files:
-                    hyperlink = li.find("a", {"class": ""})
-                    # скипаем li без ссылок, это точно не те, что нужны
-                    if hyperlink is None:
-                        continue
-                    href = hyperlink.attrs.get("href")
-                    # Как уже и было сказано выше, все равно летят рандомные теги
-                    # поэтому добавляем сюда вот это лол
-                    if not "pdf" in href:
-                        continue
-                    file_ = CustomFile(href=self.URL_BODY + href)
-                    downloaded_files.append(file_.body)
+        hyperlinks = item.find_all("a", {"class": ""})
+        for link in hyperlinks:
+            # скипаем все пустые ссылки
+            if link is None:
+                continue
+            href = link.attrs.get("href")
+            # Сначала скипаем а без ссылки
+            # Потом, скипаем а, где ссылка #
+            # Затем, скипаем а, где нет 'pdf'
+            if href is None or len(href) < 2 or "pdf" not in href:
+                continue
+            file_ = CustomFile(href=self.URL_BODY + href)
+            downloaded_files.append(file_.body)
+
         return downloaded_files

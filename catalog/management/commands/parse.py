@@ -1,6 +1,6 @@
 from catalog.models.files import ProductFile
 from django.core.management.base import BaseCommand, CommandError
-from catalog.models import Product, AttributeValue, ProductImage
+from catalog.models import Product, AttributeValue, ProductImage, ProductFile
 from catalog.utils import FoxweldParser, CustomFile, ElektrodParser
 
 
@@ -11,6 +11,8 @@ class Command(BaseCommand):
         # Сначала удаляем все картинки, дабы не было дублирования
         ProductImage.objects.all().delete()
         CustomFile.remove_product_images()
+        # Потом, удаляем все файлы товаров
+        ProductFile.objects.all().delete()
         # Далее, удаляем все свойства товара, также чтобы избежать дублирования
         AttributeValue.objects.all().delete()
         
