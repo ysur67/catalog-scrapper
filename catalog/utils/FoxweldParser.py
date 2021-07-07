@@ -1,8 +1,5 @@
-import requests
 from .BaseParser import BaseParser
-from django.conf import settings
 from .FileHandler import CustomFile
-
 
 
 class FoxweldParser(BaseParser):

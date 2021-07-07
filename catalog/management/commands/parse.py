@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 from catalog.models import Product, AttributeValue, ProductImage
-from catalog.utils import FoxweldParser, CustomFile
+from catalog.utils import FoxweldParser, CustomFile, ElektrodParser
 
 
 class Command(BaseCommand):
-    PARSER_CLASSES = (FoxweldParser, )
+    PARSER_CLASSES = (ElektrodParser, FoxweldParser)
 
     def handle(self, *args, **options):
         # Сначала удаляем все картинки, дабы не было дублирования
@@ -15,11 +15,12 @@ class Command(BaseCommand):
             parser = parser_class()
             parser.subscribe_for_parsed_product(self)
             parser.parse()
+            parser.unsubscribe(self)
             
     def on_notify(self, product_dict):
         self.import_product(product_dict)
     
-    def import_product(self, product_dict: dict) -> Product:
+    def import_product(self, product_dict: dict):
         # Забираем лишние поля из пришедшего словаря
         attribute_values = product_dict.pop("attribute_values")
         files = product_dict.pop("files")

@@ -45,7 +45,12 @@ class Product(models.Model):
         Returns:
             int: ID
         """
-        return cls.objects.last().id + 1
+        last_obj = cls.objects.last()
+        
+        if last_obj is None:
+            return 1
+        
+        return last_obj.id + 1
 
     def insert_fields(self, fields: dict):
         """Заполнить поля товара из переданног словаря.

@@ -44,7 +44,7 @@ class BaseParser:
         request = requests.get(url)
         if request.status_code != 200:
             raise ConnectionError(f"Не был получен ответ по адресу: {url}")
-        return BeautifulSoup(request.text)
+        return BeautifulSoup(request.content.decode('utf-8','ignore'))
  
     def get_product_attribute_values(self, product):
         raise NotImplementedError("Метод get_product_attribute_values должен быть переопределен")
@@ -62,6 +62,9 @@ class BaseParser:
             raise NotImplementedError("Каждый подписчик должен обладать методом on_notify!")
 
         self._subs.append(subscriber)
+
+    def unsubscribe(self, subscriber):
+        self._subs.remove(subscriber)
         
     def _notify(self):
         for subscriber in self._subs:
