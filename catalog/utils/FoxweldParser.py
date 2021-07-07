@@ -63,8 +63,6 @@ class FoxweldParser(BaseParser):
         product_price = self._clear(price_value)
         for key in product_props:
             product_props[key] = self._clear(product_props[key])
-
-        print(f"{product_title} price: {product_price} props: {product_props}")
         
         href = title_block.find("a").attrs.get("href", None)
         result = self._scrap_product_page(href)
@@ -74,6 +72,7 @@ class FoxweldParser(BaseParser):
         result['code'] = product_props.get("Артикул:", None)
         result['series'] = product_props.get("Серия:", None)
         
+        print(result)
         return result
     
     def _get_props(self, block):

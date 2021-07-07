@@ -42,6 +42,7 @@ class ElektrodParser(BaseParser):
         result["price"] = 0
         result["code"] = "ND"
         result["series"] = "ND"
+        print(result)
         return result
         
     def _scrap_product_page(self, href):
@@ -105,7 +106,6 @@ class ElektrodParser(BaseParser):
         scraped_images = list()
         for img_block in div_images.find_all("img"):
             href = img_block.attrs.get("src", "")
-            print(self.URL_BODY + href)
             image = CustomFile(href=self.URL_BODY + href)
             scraped_images.append(image.body)
         return scraped_images
