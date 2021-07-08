@@ -1,6 +1,6 @@
 
 from bs4 import BeautifulSoup
-from catalog.models import Product, Category
+from catalog.models import Product
 import requests
 from decimal import Decimal
 
@@ -17,26 +17,22 @@ class BaseParser:
     URL = ""
     URL_BODY = ""
     PRODUCT_ID_DATA_ATTR = ""
-    _soup = None
-    _subs = list()
-    _product_for_import = dict()
     
     def __init__(self):
         self._soup = self._get_base_soup()
+        # Список подписчиков, которых будет необходимо уведомлять
+        # о появлении нового товара
+        self._subs = list()
+        # Словарь, который будет передан подписчикам
+        self._product_for_import = dict()
         self._validate_required_fields()
         
     def parse(self):
         """Базовый метод, который обязан иметь каждый дочерний от Base класс."""
         raise NotImplementedError("Метод parse должен быть переопределен")
-    
-    def get_product_dict(self, product):
-        raise NotImplementedError("Метод get_product_dict должен быть переопределен")
-    
+        
     def get_soup(self, url):
         """Получить экземпляр BeautifulSoup по переданному урлу.
-
-        Args:
-            url (str): Урл
 
         Returns:
             BeautifulSoup: Инстанс бс4, готовый к парсингу
@@ -45,9 +41,6 @@ class BaseParser:
         if request.status_code != 200:
             raise ConnectionError(f"Не был получен ответ по адресу: {url}")
         return BeautifulSoup(request.content.decode('utf-8','ignore'))
- 
-    def get_product_attribute_values(self, product):
-        raise NotImplementedError("Метод get_product_attribute_values должен быть переопределен")
     
     def subscribe_for_parsed_product(self, subscriber):
         """Метоод подписки на обновление спаршенного продукта.
@@ -68,7 +61,13 @@ class BaseParser:
         
     def _notify(self):
         for subscriber in self._subs:
-            subscriber.on_notify(self._product_for_import)
+            subscriber.on_notify(self._product_for_import.copy())
+            
+    def _get_product_dict(self, product):
+        raise NotImplementedError("Метод _get_product_dict должен быть переопределен")
+ 
+    def _scrap_product_attribute_value(self, product):
+        raise NotImplementedError("Метод _scrap_product_attribute_value должен быть переопределен")
     
     def _validate_required_fields(self):
         is_valid = True

@@ -3,17 +3,12 @@ from django.conf import settings
 import uuid
 from django.core.files.temp import NamedTemporaryFile
 from django.core.files import File
-from django.core.files.storage import default_storage
 import requests
 
 
 class CustomFile:
     PRODUCT_IMAGES_DIR = settings.MEDIA_ROOT + "/product/"
     PRODUCT_FILES_DIR = settings.MEDIA_ROOT + "/files/"
-    _href = ""
-    _name = ""
-    _temporary_body = None
-    _body = None
     
     def __init__(self, href) -> None:
         self._href = href
