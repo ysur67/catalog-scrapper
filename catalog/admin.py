@@ -23,10 +23,11 @@ class CategoryAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [AttributeInline, ProductImageInline, 
                ProductFileInline]
+    list_display = ("title", "code", "price")
 
 @admin.register(AttributeValue)
 class AttributeValueAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("title", "value", "product")
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
