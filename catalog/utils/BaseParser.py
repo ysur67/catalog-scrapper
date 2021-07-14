@@ -3,10 +3,59 @@ from bs4 import BeautifulSoup
 from catalog.models import Product
 import requests
 from decimal import Decimal
+from abc import ABC, abstractmethod
 
 
-class BaseParser:
-    """Абстрактный класс парсера.
+class AbstractParser(ABC):
+    
+    @abstractmethod
+    def parse(self):
+        pass
+    
+    @abstractmethod
+    def get_soup(self):
+        pass
+
+    @abstractmethod
+    def subscribe_for_parsed_product(self, subscriber):
+        pass
+    
+    @abstractmethod
+    def unsubscribe(self, subscriber):
+        pass
+    
+    @abstractmethod
+    def _get_product_dict(self, product):
+        pass
+    
+    @abstractmethod
+    def _scrap_product_attribute_value(self, product):
+        pass
+    
+    @abstractmethod
+    def _scrap_product_page(self, href):
+        pass
+    
+    @abstractmethod
+    def _scrap_product_desription(self, item):
+        pass
+    
+    @abstractmethod
+    def _scrap_product_attribute_value(self, item):
+        pass
+    
+    @abstractmethod
+    def _scrap_product_files(self, item):
+        pass
+    
+    @abstractmethod
+    def _scrap_images(self, soup):
+        pass
+    
+    
+
+class BaseParser(AbstractParser):
+    """Базовый класс парсера.
     
     Содержит в себе определение
     базовых методов и полей.
@@ -62,13 +111,7 @@ class BaseParser:
     def _notify(self):
         for subscriber in self._subs:
             subscriber.on_notify(self._product_for_import.copy())
-            
-    def _get_product_dict(self, product):
-        raise NotImplementedError("Метод _get_product_dict должен быть переопределен")
- 
-    def _scrap_product_attribute_value(self, product):
-        raise NotImplementedError("Метод _scrap_product_attribute_value должен быть переопределен")
-    
+
     def _validate_required_fields(self):
         is_valid = True
         if self.URL is None or self.URL == "":
@@ -122,18 +165,3 @@ class BaseParser:
     
     def _get_base_soup(self):
         return self.get_soup(self.URL)
-    
-    def _scrap_product_page(self, href):
-        raise NotImplementedError("Метод _scrap_product_page должен быть переопределен")
-    
-    def _scrap_product_desription(self, item):
-        raise NotImplementedError("Метод _scrap_product_desription должен быть переопределен")
-    
-    def _scrap_product_attribute_value(self, item):
-        raise NotImplementedError("Метод _scrap_product_attribute_value должен быть переопределен")
-    
-    def _scrap_product_files(self, item):
-        raise NotImplementedError("Метод _scrap_product_file должен быть переопределен")
-    
-    def _scrap_images(self, soup):
-        raise NotImplementedError("Метод _scrap_images должен быть переопределен")
