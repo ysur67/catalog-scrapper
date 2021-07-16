@@ -31,11 +31,18 @@ class FoxweldParser(BaseParser):
         pagin_url = self.URL + f"?PAGEN_1={page_number}"
         soup = self.get_soup(pagin_url)
         items = soup.find_all("li", {"class": "item"})
+        cateogry_title = self._scrap_category_title(soup)
         for item in items:
             # Изменяем словарь класса на новый словарь
             self._product_for_import = self._get_product_dict(item)
+            self._product_for_import["category"] = cateogry_title
             # Уведомляем подписчиков о смене словаря
             self._notify()
+
+    def _scrap_category_title(self, soup):
+        main_content_block = soup.find("div", {"class": "main-content"})
+        title = main_content_block.find("h1")
+        return self._clear(title.text)
 
     def _get_product_dict(self, product):
         """Получить словарь модели продукта, готовый к импорту.

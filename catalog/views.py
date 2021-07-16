@@ -24,6 +24,7 @@ class BaseExportView(View):
         csv = self.CSV_CONSTRUCTOR_CLASS(file_name)
         csv.set_header(header)
         csv.set_rows(rows=row_data)
+        csv.set_delimiter("|")
         csv.create_file()
         file_path = csv.absolute_path
         with open(file_path, 'r') as f:

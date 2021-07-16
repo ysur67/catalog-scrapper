@@ -13,7 +13,9 @@ class ElektrodParser(BaseParser):
         # Крайне древняя верстка на сайте,
         # потому делаем такие уровни вложенности,
         # чтобы избежать попадания рандомных тегов в требуемые
-        for table in self._get_tables():
+        for category in self._get_categories():
+            category_title = self._scrap_category_title(category)
+            table = category.find("table", {"class": "index-gallery"})
             table_rows = table.find_all("tr")
             for row in table_rows:
                 table_tds = row.find_all("td", "link-description")
@@ -21,10 +23,16 @@ class ElektrodParser(BaseParser):
                     self._product_for_import = self._get_product_dict(td)
                     if self._product_for_import is None:
                         continue
+                    self._product_for_import['category'] = category_title
                     self._notify()
-                    
-    def _get_tables(self):
-        return self._soup.find_all("table", {"class": "index-gallery"})
+
+    def _get_categories(self):
+        return self._soup.find_all("div", {"class": "categories"})
+
+    def _scrap_category_title(self, block):
+        h5 = block.find("h5", {"class": "best-sellers"})
+        a = h5.find("a", {"class": ""})
+        return self._clear(a.text)
     
     def _get_product_dict(self, product):
         id_ = self._get_id(product)

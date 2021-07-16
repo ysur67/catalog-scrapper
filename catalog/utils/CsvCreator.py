@@ -17,6 +17,20 @@ class CsvConstructor:
         self._rows = dict()
         self._is_created = False
         self._name = file_name + ".csv"
+        self._delimiter = ";"
+        
+    def set_delimiter(self, value: str):
+        """Установить сепаратор в .csv файле.
+
+        Args:
+            value (str): Символ сепаратора
+
+        Raises:
+            ValueError: Если длина строки больше 1
+        """
+        if len(value) > 1:
+            raise ValueError("Размер сепаратора не может быть больше 1 символа")
+        self._delimiter = value
 
     def set_header(self, header: dict):
         """Настроить оглавленеие файла."""
@@ -35,7 +49,7 @@ class CsvConstructor:
         
         file_ = open(self.DEFAULT_FILE_PATH + self._name, 'w+', encoding='UTF8', newline="")
         
-        writer = csv.DictWriter(file_, fieldnames=self._header, delimiter=';')
+        writer = csv.DictWriter(file_, fieldnames=self._header, delimiter=self._delimiter)
         writer.writeheader()
         writer.writerows(self._rows)
 

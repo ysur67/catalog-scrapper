@@ -6,8 +6,9 @@ from catalog.models import Product, AttributeValue, ProductImage
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ("id", "title", "code", 
-                  "series", "price", "description")
+        fields = ("id", "slug", "title", "category",
+                  "code","series", "price",
+                  "description")
 
 
 class AttributeValueSerializer(serializers.ModelSerializer):
