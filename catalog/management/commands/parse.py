@@ -5,8 +5,7 @@ from catalog.utils import FoxweldParser, CustomFile, ElektrodParser
 
 
 class Command(BaseCommand):
-    # PARSER_CLASSES = (ElektrodParser, FoxweldParser)
-    PARSER_CLASSES = (ElektrodParser, )
+    PARSER_CLASSES = (ElektrodParser, FoxweldParser)
 
     def handle(self, *args, **options):
         # Сначала удаляем все картинки, дабы не было дублирования
@@ -45,10 +44,17 @@ class Command(BaseCommand):
             attribute.value = attribute_values[key]
             attribute.save()
             
-    def import_product_images(self, product, images):   
+    def import_product_images(self, product: Product, images: list):
+        if not images:
+            return
+        
+        MAIN_IMAGE_INDEX = 0
+        main_image = images[MAIN_IMAGE_INDEX]
+        images.pop(MAIN_IMAGE_INDEX)
+        product.upload_image(main_image)
         for file_body in images:           
             ProductImage.objects.create(product=product, image=file_body)
-            
+
     def import_product_files(self, product, files):
         if files is None:
             return

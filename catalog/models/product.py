@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.text import slugify
 from .category import Category
 from ckeditor.fields import RichTextField
@@ -16,6 +17,7 @@ class Product(models.Model):
     category = models.CharField(verbose_name="Категория", max_length=300, blank=True, null=True)
     description = RichTextField(verbose_name="Описание", null=True, blank=True)
     slug = models.SlugField(max_length=300, verbose_name="Символьный код", null=True, blank=True)
+    image = models.ImageField(upload_to="product", null=True, blank=True)
     
     def __str__(self) -> str:
         return self.title
@@ -65,4 +67,8 @@ class Product(models.Model):
 
     def update_slug(self):
         self.slug = slugify(self.title)
+        self.save()
+        
+    def upload_image(self, image):
+        self.image = image
         self.save()
